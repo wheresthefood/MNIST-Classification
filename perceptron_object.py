@@ -15,7 +15,7 @@ class Perceptron(object):
 		self.alpha = alpha
 		self.iteration = iteration
 		self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=test_percentage, random_state=42)
-		self.weights = self.all_numbers(self.X_train, self.y_train)
+		self.weights = self.all_numbers(self.X_train, self.y_train, self.iteration, self.alpha)
 		self.accuracy = self.test_all(self.X_test, self.y_test, self.weights)
 
 
@@ -70,13 +70,13 @@ class Perceptron(object):
 	    tn_p = true_neg/float(a- np.sum(labels))
 	    return true_pos, true_neg, tp_p, tn_p, a
 	    
-	def all_numbers(self, data,labels):
+	def all_numbers(self, data,labels, iterations, alpha):
 		c,d = np.shape(data)
 		w = self.create_weights(data)
 		weights = []
 		for i in range(0,  len(np.unique(labels))):
 			z = self.one_number(labels, i)
-			a = self.train_perceptron(data, z, w, .1, 4)
+			a = self.train_perceptron(data, z, w, alpha, iterations)
 			weights.append(a[:,0])
 		return np.asarray(weights)
 
