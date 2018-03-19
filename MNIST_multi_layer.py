@@ -4,51 +4,54 @@ import random
 data = np.loadtxt('sin.csv', delimiter = ',')
 from scipy.special import expit
 
-
+## This is only going to work for a binary outpput and the the last layer needs to be 1 neuron
 class NN(object):
 
-	def __init__ (self, data, labels, size = [2,2,4,1], alpha = .1, batch = 20, test_percentage = .3):
+	def __init__ (self, data, labels, size = [2,2,4,1], alpha = .1, activation_funtion = 'sig', batch = 20, test_percentage = .3):
 		# self.data = self.add_ones(data)
 		self.data = data
 		# self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.data, labels, test_size=test_percentage, random_state=42)
 		self.size = size
 		self.alpha = alpha
-		self.batch = batch
+		self.batch = batch   ##this isn't being used right now.  Will update later
 		self.weights, self.bias = self.create_weights()
+		self.activation_funtion = activation_funtion ##I'm also going to update this later
 
 
-	def signoid(self, x):
-		return expit(x)
+	def sigmoid(self, x):
+		return 1/(1+np.exp(-x))
 
 	def sig_prime(self, sig):
 		return sig*(1-sig)
-		#just to be clear, instead of computing sigmoid 3 times, i can just store the value, and then use it again for the derivative
+		#input should be the result of the activation funtion, not the neuron 
 
-		
-	def add_ones(self, x):
-	 	a, b = np.shape(x)
-		c = np.ones((a , 1))   
-		return np.hstack((c, x))
 
 	def create_weights(self):
 		a,b = np.shape(self.data)
-		new_size = [b]+self.size
-		w = [np.random.randn(y,x) for x,y in zip(new_size[:-1], new_size[1:])]
+		w = [np.random.randn(y,x) for x,y in zip(self.size[:-1], self.size[1:])]
 		b = [np.random.randn(1,y) for y in self.size]
 		return w, b
 
 	def feed_foward(self, data, weights, bias):
 		temp = data
+		#record activations of each
+		act = {}
+		count = 0
 		for w,b in zip(weights, bias):
-			temp = self.signoid(np.inner(temp, w)+b)
-			print temp
-		return temp
+			temp = self.sigmoid(np.inner(temp, w)+b)
+			act[count] = temp
+			count += 1
+		return temp, act
+
+	def back_prop(self, data, labels, act, weights):
+		pass
+
+x = data[:, 0:2]
+y = data[:, 2:3]
+a = NN(x, y)
+c,b = a.feed_foward(a.data, a.weights, a.bias)
+
+# print a.back_prop(c,labels,b)
 
 
-data = np.array(([2,3],[3,4]))
-labels = 1
-
-a = NN(data, labels)
-
-a.feed_foward(a.data, a.weights, a.bias)
 
