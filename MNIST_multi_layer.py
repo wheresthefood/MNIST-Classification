@@ -38,7 +38,7 @@ class NN(object):
 		act = {}
 		count = 0
 		for w,b in zip(weights, bias):
-			temp = self.sigmoid(np.inner(temp, w)+b)
+			temp = self.sigmoid(np.dot(temp, w)+b)
 			act[count] = temp
 			count += 1
 		return temp, act

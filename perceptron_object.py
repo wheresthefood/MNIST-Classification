@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 # X = np.asarray(data[1:,1:], dtype='float')
 
 class Perceptron(object):
-	def __init__(self, data, labels, alpha = .1, iteration = 30, test_percentage = .9):
+	def __init__(self, data, labels, alpha = .1, iteration = 30, test_percentage = .9, binary = False):
 		self.X = self.add_ones(data)
 		self.y = labels
 		self.alpha = alpha
@@ -17,6 +17,10 @@ class Perceptron(object):
 		self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=test_percentage, random_state=42)
 		self.weights = self.all_numbers(self.X_train, self.y_train, self.iteration, self.alpha)
 		self.accuracy = self.test_all(self.X_test, self.y_test, self.weights)
+		if binary:
+			self.w = self.create_weights(self.X_train)
+			self.binary_weigths = self.train_perceptron(self.X_train, self.y_train, self.w, alpha = self.alpha, iterations = self.iteration)
+			self.tp = self.test_perceptron_f(self.X_test, self.y_train, self.w)
 
 
 	def add_ones(self, x):
@@ -59,7 +63,7 @@ class Perceptron(object):
 				weights = self.update(weights, data[i], labels[i], alpha)
 		return weights
 
-	def test_perceptron_f(data, labels, weights):
+	def test_perceptron_f(self,data, labels, weights):
 	    a,b = np.shape(data)
 	    predicted = self.predict(data, weights)
 	    correct = (predicted==labels)*1==1
