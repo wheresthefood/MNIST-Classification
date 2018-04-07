@@ -73,21 +73,3 @@ class NN(object):
  			return np.asarray([output]).T
  		correct = pr(out2)==labels
 		return correct*1, pr(out2), out2
-
-class NN_multi(NN):
-	def __init__ (self, data, labels, hidden_layer_size = 3, alpha = .1, batch = 20):
-		NN.__init__ (self, data, labels, hidden_layer_size = 3, alpha = .1, batch = 20)
-
-	# def label_vector(self, y):
-	# 	mx = np.max(y)+1
-	# 	return np.eye(mx)[y]
-
-
-data = np.loadtxt('sin_multi.csv', dtype = str, delimiter = ',')
-y = np.asarray(data[:, 0:1], dtype='float')
-X = np.asarray(data[1:,1:], dtype='float')
-
-print data
-
-a = NN_multi(X, y)
-# a.label_vector(y)
