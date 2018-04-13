@@ -5,11 +5,9 @@ import random
 #only for binary distinction
 class NN(object):
 
-	def __init__ (self, data, labels, hidden_layer_size = 3, alpha = .1, batch = 20):
+	def __init__ (self, data, labels, hidden_layer_size = 3):
 		self.data = data
-		self.alpha = alpha
-		#self.batch = batch
-		#I'm going to keep this in here to implement batch gradient decent later
+		self.labels = labels
 		self.size = hidden_layer_size
 		self.wh, self.wo, self.bh, self.bo = self.create_weights()
 
@@ -30,46 +28,49 @@ class NN(object):
 		bo = np.random.randn(1, 1)
 		return wh, wo, bh, bo
 
- 	def feed_foward(self, data, wh, wo, bh, bo):
+ 	def feed_foward(self, data):
+		output1 = self.sigmoid(np.dot(data, self.wh)+self.bh)
+		output2 = self.sigmoid(np.dot(output1, self.wo)+self.bo)
 
- 		output1 = self.sigmoid(np.dot(data, wh)+bh)
- 		output2 = self.sigmoid(np.dot(output1, wo)+bo)
 
  		return output1, output2
 
- 	def back_prop(self, data, labels, output1, output2, wh, wo, bh, bo, alpha = 1):
- 		error = labels - output2
+ 	def back_prop(self, output1, output2, alpha):
+ 		error = self.labels - output2
  		delta_output = error*self.sig_prime(output2)
- 		error_hidden = delta_output.dot(wo.T)
+ 		error_hidden = delta_output.dot(self.wo.T)
  		delta_hidden = error_hidden*self.sig_prime(output1)
- 		wo +=  alpha*output1.T.dot(delta_output)
- 		wh += alpha*data.T.dot(delta_hidden)
- 		bo += alpha*np.sum(delta_output, axis = 0)
- 		bh += alpha*np.sum(delta_hidden, axis = 0)
+ 		self.wo +=  alpha*output1.T.dot(delta_output)
+ 		self.wh += alpha*self.data.T.dot(delta_hidden)
+ 		self.bo += alpha*np.sum(delta_output, axis = 0)
+ 		self.bh += alpha*np.sum(delta_hidden, axis = 0)
  		total_error = np.sum(abs(error))
- 		return wo, wh, total_error
+ 		return total_error
 
 
- 	def train(self, data, labels, wh, wo, bh, bo, alpha = 100, iter = 120000):
+ 	def train(self, data = None, alpha = 100, iterations = 120000):
+ 		data = self.data
  		error = []
- 		for i in range(0, iter):
- 			output1, output2 = self.feed_foward(data,wh, wo, bh, bo)
- 			wo, wh, total_error = self.back_prop(data, labels, output1, output2, wh, wo, bh, bo, alpha = alpha)
+ 		for i in range(0, iterations):
+ 			output1, output2 = self.feed_foward(data)
+ 			total_error = self.back_prop(output1, output2, alpha)
  			if i%1000 == 0:
  				if i%10000:
  					print total_error, i//1000, 'Thousand Iterations'
  				error.append(total_error)
- 		return wh, wo, bh, bo, total_error
+ 		return total_error
 
- 	def test(self, data, labels, wh, wo, bh, bo):
- 		out1, out2 = self.feed_foward(data,wh, wo, bh, bo)
- 		def pr(x):
- 			output = []
- 			for i in x:
- 				if i >=.5:
- 					output.append(1)
- 				else:
- 					output.append(0)
- 			return np.asarray([output]).T
- 		correct = pr(out2)==labels
-		return correct*1, pr(out2), out2
+ 	def predict(self, x):
+ 		out1, out2 = self.feed_foward(x)
+ 		results = []
+ 		for i in out2:
+			if i >=.5:
+				results.append(1)
+			else:
+				results.append(0)
+		return np.asarray([results]).T
+
+	def test(self, x, labels):
+		results =  self.predict(x)
+		correct = (results==self.labels)*1
+		return correct, results
